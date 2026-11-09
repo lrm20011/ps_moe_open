@@ -1,0 +1,11 @@
+torch==2.11.0
+transformers==5.17.0
+accelerate==1.15.0
+safetensors==0.8.0
+numpy
+pillow
+
+# Acceleration (CUDA only)
+flash-attn==2.8.3
+flash-linear-attention==0.5.2
+causal-conv1d==1.6.2.post1
