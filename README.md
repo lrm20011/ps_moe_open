@@ -214,49 +214,6 @@ python example/batch_inference.py --model-path /path/to/PhysMoE-9B
 | bbox | `whiteboard_marker`, `wire_cutter`, `blue_umbrella`, `umbrella`, `folding_umbrella` |
 | trajectory | `reach_mug`, `reach_cloth`, `mushroom_pot`, `marker_bowl`, `lid_pot`, `green_object_bowl` |
 
-**Running on CPU.** Pass `--device cpu`. If `causal-conv1d` or `flash-linear-attention` is installed,
-transformers uses their CUDA-only kernels for the Qwen3.5 linear-attention layers. `ps_utils.load_model`
-therefore hides them on CPU and falls back to the PyTorch implementation. A 9B model on CPU takes minutes per answer.
-
-## Architecture
-
-```mermaid
-flowchart LR
-    I[Image] --> V[Vision encoder<br/>Qwen3.5-VL ViT]
-    T["Text + coordinate tokens<br/>'... #lt;|x,y|#gt; ...'"] --> E{token type}
-    E -- text --> WE[Word embedding]
-    E -- "coordinate (x,y)" --> PE["Bilinear sample of ViT<br/>2D position table → Linear"]
-    V --> S
-    WE --> S[Input sequence]
-    PE --> S
-    S --> L["Shared decoder layers<br/>(first N−K)"]
-    L --> R[Router MLP]
-    L --> M["MoE decoder layers (last K)<br/>shared attention<br/>FFN: text expert | pixel expert"]
-    R -- per-token route --> M
-    M --> H1[LM head → text token]
-    M --> H2["Pixel head (MLP + sigmoid)<br/>→ (x, y) ∈ [0,1]²"]
-```
-
-- **Coordinate token IDs.** `id = pix_start + y_bin * num_bins + x_bin` with `pix_start = 300000` and
-  `num_bins = 1000`, which is beyond the text vocabulary. The tokenizer (`Qwen3_5PixTokenizer`) converts
-  `<|x,y|>` to these IDs and back.
-- **Router.** `router_mlp` reads the hidden state after the shared layers and predicts *text* vs.
-  *coordinate* for the next token. In training the route is teacher-forced from the label; in inference it
-  is the router's argmax. The same decision picks the output head.
-- **MoE layers.** In the last `router_k_layers` decoder layers (8 of 32 for PhysMoE-9B) every token uses
-  either the original FFN (`mlp`) or the pixel FFN (`pix_mlp`, initialized from `mlp`).
-- **Pixel head.** `coord_mode="continuous"`: a 2-layer MLP with sigmoid outputs `(x, y)`.
-  `coord_mode="discrete"`: per-axis softmax over bins, decoded by expectation. During `generate()`
-  the predicted point is written into the logits as a single coordinate token, so standard Hugging Face
-  generation (greedy, KV cache, batching) works unchanged.
-- **Training loss** (code included for reference). LM cross-entropy on text tokens, router cross-entropy,
-  and `lambda_coord ×` Smooth-L1 on coordinates. Optional extras: a signed-distance loss for mask-supervised
-  points, EOS re-weighting and coordinate input noise.
-- **Optional fused coordinate embedding** (`model/pixel_fusion.py`). It mixes the learned position embedding
-  with Fourier features and the image patch feature at `(x, y)`. It is enabled with
-  `use_fused_pixel_embedding: true` in the config. **The released checkpoint does not use it** and uses the
-  learned position embedding only.
-
 ## Repository Structure
 
 ```text
