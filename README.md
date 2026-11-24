@@ -5,7 +5,7 @@
 **PhysMoE: Fast Spatial Grounding with Single-Token Coordinate Representation
 in Modality-Decoupled VLMs**
 
-<a href="resource/PhysMoE.pdf"><img src="https://img.shields.io/badge/Paper-PDF-b31b1b?logo=adobeacrobatreader&logoColor=white" alt="Paper"></a>
+<a href="https://arxiv.org/abs/2611.13000"><img src="https://img.shields.io/badge/arXiv-2611.13000-b31b1b?logo=arxiv&logoColor=white" alt="Paper on arXiv"></a>
 <a href="https://huggingface.co/RomanTHT/PhysMoE"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Model-HuggingFace-ffc107" alt="Model on Hugging Face"></a>
 
 [Overview](#overview) · [Gallery](#gallery) · [Installation](#installation) · [Quick Start](#quick-start) · [Prompt Format](#prompt-format) · [Examples](#examples) · [Architecture](#architecture)
@@ -20,7 +20,7 @@ in Modality-Decoupled VLMs**
 
 ## News
 
-- **2026-11** — The [paper](resource/PhysMoE.pdf), inference code, example scripts and qualitative results are released.
+- **2026-11** — The [paper](https://arxiv.org/abs/2611.13000), inference code, example scripts and qualitative results are released.
 - **Coming soon** — Model checkpoints on [Hugging Face](https://huggingface.co/RomanTHT/PhysMoE) (training is ongoing).
 
 ## Overview
